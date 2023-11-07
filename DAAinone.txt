@@ -1,0 +1,300 @@
+//daa 1 fibonacci
+
+#include <iostream>
+using namespace std;
+
+int fibRecursion(int n) {
+    if (n <= 1) {
+        return n;
+    }
+    return fibRecursion(n - 1) + fibRecursion(n - 2);
+}
+
+int main() {
+    int n;
+    cout << "Enter series numbers: ";
+    cin >> n;
+    cout << "Fibonacci Series of " << n << " numbers is: " << endl;
+    for (int i = 0; i < n; i++) {
+        cout << fibRecursion(i) << " ";
+    }
+    return 0;
+}
+
+============================================
+//huffman encoding by greedy algo DAA 2
+
+
+#include <iostream>
+#include <queue>
+#include <unordered_map>
+#include <string>
+
+using namespace std;
+
+class HuffmanNode {
+public:
+    char data;
+    int frequency;
+    HuffmanNode* left;
+    HuffmanNode* right;
+    HuffmanNode(char data, int frequency) : data(data), frequency(frequency), left(nullptr), right(nullptr) {}
+};
+
+struct compare {
+    bool operator()(HuffmanNode* left, HuffmanNode* right) {
+        return (left->frequency > right->frequency);
+    }
+};
+
+void generateCodes(HuffmanNode* node, string code, unordered_map<char, string>& huffmanCodes) {
+    if (node == nullptr) {
+        return;
+    }
+    if (node->data != '\0') {
+        huffmanCodes[node->data] = code;
+    }
+    generateCodes(node->left, code + "0", huffmanCodes);
+    generateCodes(node->right, code + "1", huffmanCodes);
+}
+
+int main() {
+    string inputString;
+    cout << "Enter a string to encode: ";
+    getline(cin, inputString);
+
+    // Calculate character frequencies
+    unordered_map<char, int> frequencyMap;
+    for (char c : inputString) {
+        frequencyMap[c]++;
+    }
+
+    // Build Huffman Tree
+    priority_queue<HuffmanNode*, vector<HuffmanNode*>, compare> priorityQueue;
+    for (auto entry : frequencyMap) {
+        priorityQueue.push(new HuffmanNode(entry.first, entry.second));
+    }
+    while (priorityQueue.size() > 1) {
+        HuffmanNode* left = priorityQueue.top();
+        priorityQueue.pop();
+        HuffmanNode* right = priorityQueue.top();
+        priorityQueue.pop();
+        HuffmanNode* mergedNode = new HuffmanNode('\0', left->frequency + right->frequency);
+        mergedNode->left = left;
+        mergedNode->right = right;
+        priorityQueue.push(mergedNode);
+    }
+    HuffmanNode* root = priorityQueue.top();
+    priorityQueue.pop();
+
+    // Generate Huffman Codes
+    unordered_map<char, string> huffmanCodes;
+    generateCodes(root, "", huffmanCodes);
+
+    // Encode the input string
+    string encodedString;
+    for (char c : inputString) {
+        encodedString += huffmanCodes[c];
+    }
+
+    // Display Huffman Codes
+    cout << "\nHuffman Codes:" << endl;
+    for (auto entry : huffmanCodes) {
+        cout << entry.first << ": " << entry.second << endl;
+    }
+
+    // Display encoded string
+    cout << "\nEncoded String:" << endl;
+    cout << encodedString << endl;
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+======================================================================
+//fractional kanpasck DAA 3
+
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Item {
+public:
+    int weight;
+    int value;
+
+    Item(int weight, int value) {
+        this->weight = weight;
+        this->value = value;
+    }
+
+    double getValuePerWeight() const {
+        return (double)value / weight;
+    }
+
+    bool operator<(const Item &other) const {
+        double ratio1 = this->getValuePerWeight();
+        double ratio2 = other.getValuePerWeight();
+        return ratio1 > ratio2; // Sort in descending order of value-to-weight ratio
+    }
+};
+
+double fractionalKnapsack(vector<Item> &items, int capacity) {
+    sort(items.begin(), items.end()); // Sort items in descending order of value-to-weight ratio
+    double maxValue = 0.0;
+    int currentWeight = 0;
+
+    for (const auto &item : items) {
+        if (currentWeight + item.weight <= capacity) {
+            // Take the whole item
+            currentWeight += item.weight;
+            maxValue += item.value;
+        } else {
+            // Take a fraction of the item
+            int remainingCapacity = capacity - currentWeight;
+            double fraction = (double)remainingCapacity / item.weight;
+            maxValue += fraction * item.value;
+            break; // The knapsack is full
+        }
+    }
+    return maxValue;
+}
+
+int main() {
+    int n;
+    cout << "Enter the number of items: ";
+    cin >> n;
+    vector<Item> items;
+    for (int i = 0; i < n; i++) {
+        cout << "Enter details for item " << (i + 1) << ":" << endl;
+        int weight, value;
+        cout << "Weight: ";
+        cin >> weight;
+        cout << "Value: ";
+        cin >> value;
+        items.emplace_back(Item(weight, value));
+    }
+    int capacity;
+    cout << "Enter the maximum capacity of the knapsack: ";
+    cin >> capacity;
+    double maxValue = fractionalKnapsack(items, capacity);
+    cout << "Maximum value obtainable: " << maxValue << endl;
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=========================================================
+//0-1 knapsack DAA 4
+
+
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    
+    
+    int capacity = 10;
+     int items = 4;
+     int price[items + 1] = {0,3,7,2,9};
+     int wt[items+1] = {0,2,2,4,5};
+     int dp[items+1][capacity+1];
+     
+     for(int i=0;i<=items ; i++){
+         for(int j=0;j<=capacity;j++){
+             if(i == 0 || j==0){
+                 dp[i][j] = 0;
+             }
+             else if(wt[i]<=j){
+                 dp[i][j] = max(dp[i-1][j],price[i]+dp[i-1][j-wt[i]]);
+             }
+             else{
+                 dp[i][j] = dp[i-1][j];
+             }
+             
+         }
+     }
+     cout<<"MAximimum Profit Earned:"<<dp[items][capacity]<<endl;
+     
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======================================================
+//write bino (DAA 5
+
+#include <iostream>
+using namespace std;
+
+int bino(int n, int k) {
+    if (k > n)
+        return 0;
+
+    if (k == 0 || k == n)
+        return 1;
+
+    return bino(n - 1, k - 1) + bino(n - 1, k);
+}
+
+int main() {
+    int n = 5, k = 2;
+    cout << "Value of C(" << n << "," << k << ") is " << bino(n, k);
+    return 0;
+}
+====================================================================
+
